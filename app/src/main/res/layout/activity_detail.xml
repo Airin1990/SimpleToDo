@@ -72,7 +72,7 @@
         android:id="@+id/editText3"
         android:layout_alignParentRight="true"
         android:layout_alignParentEnd="true"
-        android:hint="Date"
+        android:hint="Date(mm/dd/yyyy)"
         android:singleLine="false" />
 
     <EditText

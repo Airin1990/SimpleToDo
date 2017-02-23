@@ -39,7 +39,7 @@ public class DetailActivity extends AppCompatActivity {
 
         ToDo td = (ToDo) intent.getSerializableExtra("item");
         name.setText(td.getTitle());
-        SimpleDateFormat df = new SimpleDateFormat("dd-MMM-yyyy");
+        SimpleDateFormat df = new SimpleDateFormat("MM/dd/yyyy");
         date.setText(df.format(td.getDueDate()));
         notes.setText(td.getNotes());
         switch (td.getPriority().toString()) {
@@ -73,7 +73,7 @@ public class DetailActivity extends AppCompatActivity {
 
     public void saveItem(View view) {
         Intent intent = new Intent();
-        SimpleDateFormat df = new SimpleDateFormat("dd-MMM-yyyy");
+        SimpleDateFormat df = new SimpleDateFormat("MM/dd/yyyy");
         ToDo backToDo = null;
         try {
             Log.d("toDolist", "sendDataback" + priority.getSelectedItem().toString() + df.parse(date.getText().toString()));
