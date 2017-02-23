@@ -16,6 +16,14 @@ import com.weijie.simpletodo.R;
 import com.weijie.simpletodo.adapter.ToDoAdapter;
 import com.weijie.simpletodo.model.ToDo;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.StreamCorruptedException;
 import java.util.ArrayList;
 import java.util.Date;
 
@@ -41,6 +49,7 @@ public class MainActivity extends AppCompatActivity {
             public boolean onItemLongClick(AdapterView<?> adapterView, View view, int i, long l) {
                 aToDoAdapter.remove(aToDoAdapter.getItem(i));
                 aToDoAdapter.notifyDataSetChanged();
+                writeArray();
                 return false;
             }
         });
@@ -61,11 +70,14 @@ public class MainActivity extends AppCompatActivity {
 
     private void populateItems() {
         //To add default items here
-        toDoItems = new ArrayList<>();
-
-        toDoItems.add(new ToDo("Wash clothes", new Date(),"Low", "","To-Do"));
-        toDoItems.add(new ToDo("Clean Houses", new Date(),"Medium", "","Done"));
-        toDoItems.add(new ToDo("Buy Television", new Date(),"High", "","To-Do"));
+        toDoItems = read(this);
+        if (toDoItems == null) {
+            toDoItems = new ArrayList<>();
+            toDoItems.add(new ToDo("Wash clothes", new Date(), "Low", "", "To-Do"));
+            toDoItems.add(new ToDo("Clean Houses", new Date(), "Medium", "", "Done"));
+            toDoItems.add(new ToDo("Buy Television", new Date(), "High", "", "To-Do"));
+            writeArray();
+        }
     }
 
     @Override
@@ -85,6 +97,7 @@ public class MainActivity extends AppCompatActivity {
             if (resultCode == RESULT_OK) {
                 toDoItems.set(editPos,(ToDo) data.getSerializableExtra("dataBack"));
                 aToDoAdapter.notifyDataSetChanged();
+                writeArray();
             }
         }
     }
@@ -92,12 +105,55 @@ public class MainActivity extends AppCompatActivity {
     public void addItem(View view) {
         String additem = editText.getText().toString();
         if (additem!= null && additem != "") {
-            ToDo newitem = new ToDo(additem, new Date(),"Low","","To-do");
+            ToDo newitem = new ToDo(additem, new Date(),"Low","","To-Do");
             aToDoAdapter.add(newitem);
             aToDoAdapter.notifyDataSetChanged();
+            writeArray();
             editText.setText("");
             InputMethodManager imm = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);
             imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
         }
+    }
+
+    public void writeArray() {
+        File f = new File(getFilesDir(),"MyToDoItems.srl");
+        try {
+            FileOutputStream fos = new FileOutputStream(f);
+            ObjectOutputStream objectwrite = new ObjectOutputStream(fos);
+            objectwrite.writeObject(toDoItems);
+            fos.close();
+
+            if (!f.exists()) {
+                f.mkdirs();
+            }
+
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public ArrayList<ToDo> read(Context context) {
+
+        ObjectInputStream input = null;
+        ArrayList<ToDo> result = null;
+        File f = new File(this.getFilesDir(),"MyToDoItems.srl");
+        try {
+
+            input = new ObjectInputStream(new FileInputStream(f));
+            result = (ArrayList<ToDo>) input.readObject();
+            input.close();
+
+        } catch (StreamCorruptedException e) {
+            e.printStackTrace();
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
+        }
+        return result;
     }
 }
